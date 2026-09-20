@@ -19,6 +19,7 @@ The prototype separates:
 3. **Execution** — bounded operational tools.
 4. **Human review** — queue for cases requiring judgment.
 5. **Evaluation** — metrics for quality and automation safety.
+6. **Control dashboard** — operational view of decisions and risk.
 
 ### Current components
 
@@ -30,7 +31,26 @@ The prototype separates:
 - `src/evaluate.py` — interpretation evaluation
 - `src/metrics.py` — automation and safety metrics
 - `data/evaluation_cases.json` — evaluation dataset
+- `dashboard/app.py` — operations control dashboard
 - `tests/` — automated tests
+
+## Control dashboard
+
+The Streamlit dashboard surfaces:
+
+- Automation rate
+- Escalation rate
+- High-risk automation rate
+- Case-level decisions
+- Risk distribution
+- Decision traces and rationale
+
+Run:
+
+```bash
+pip install -r dashboard/requirements.txt
+streamlit run dashboard/app.py
+```
 
 ## Safety boundary
 
