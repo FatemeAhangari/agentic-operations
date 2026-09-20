@@ -1,115 +1,181 @@
 # Agentic Operations
 
-An executable prototype for redesigning operational case handling around AI-assisted interpretation, deterministic guardrails, bounded tool use, human review, and measurable outcomes.
+**An AI-assisted operations workflow designed around a simple principle: use AI where it adds value, keep critical decisions deterministic, and keep humans in the loop where risk requires judgment.**
 
-## Product problem
+This is an executable product/system prototype for operational case handling — not a chatbot demo.
 
-Operations teams repeatedly handle cases that require classification, investigation, decision-making, communication, and follow-up.
+## 1. The problem
 
-The opportunity is not simply to add a chatbot. It is to redesign the workflow so AI can interpret ambiguous cases, deterministic policies constrain risk, tools perform bounded actions, and humans handle cases where automation should stop.
+Operations teams repeatedly handle cases that require:
 
-## Architecture
+- Understanding an unstructured customer or operational request
+- Classifying the case
+- Investigating context
+- Deciding what can be automated
+- Executing an operational action
+- Escalating when automation is unsafe
+- Measuring whether the workflow is actually improving
 
-**Case → AI interpretation → Policy / Guardrails → Orchestrator → Tool / Human Review → Decision & Evaluation**
+A naive approach is to put an LLM in the middle and let it decide.
 
-The prototype separates:
+This project takes a different approach:
 
-1. **Interpretation** — model-agnostic interface for understanding the case.
-2. **Policy** — deterministic risk and approval rules.
-3. **Execution** — bounded operational tools.
-4. **Human review** — queue for cases requiring judgment.
-5. **Evaluation** — metrics for quality and automation safety.
-6. **Control dashboard** — operational view of decisions and risk.
+> **AI interprets. Policy constrains. Tools execute. Humans handle risk. Evaluation closes the loop.**
 
-### Current components
+## 2. Why AI — and where not to use it
 
-- `src/llm_adapter.py` — model-agnostic interpretation interface
-- `src/agent.py` — policy and risk decisions
-- `src/orchestrator.py` — routing and tool selection
-- `src/tools.py` — simulated operational tools
-- `src/review_queue.py` — human-in-the-loop review queue
-- `src/evaluate.py` — interpretation evaluation
-- `src/metrics.py` — automation and safety metrics
-- `data/evaluation_cases.json` — evaluation dataset
-- `dashboard/app.py` — operations control dashboard
-- `tests/` — automated tests
+AI is useful when the input is ambiguous, unstructured, or requires interpretation.
 
-## Control dashboard
+Deterministic logic is preferable when the rule is explicit and the consequences are predictable.
 
-The Streamlit dashboard surfaces:
+For example:
 
-- Automation rate
-- Escalation rate
-- High-risk automation rate
-- Case-level decisions
-- Risk distribution
-- Decision traces and rationale
+| Decision | Mechanism | Why |
+|---|---|---|
+| Understand a free-text case | AI / semantic interpretation | Language is ambiguous |
+| Apply refund threshold | Deterministic policy | Explicit business rule |
+| Execute a known operational action | Bounded tool | Predictable execution |
+| Handle high-risk / ambiguous case | Human review | Requires judgment |
 
-Run:
+The goal is **not maximum AI usage**. The goal is the right mechanism for each part of the workflow.
 
-```bash
-pip install -r dashboard/requirements.txt
-streamlit run dashboard/app.py
+## 3. Product architecture
+
+**Case → AI Interpretation → Policy / Guardrails → Orchestrator → Tool / Human Review → Decision → Evaluation**
+
+### System boundaries
+
+1. **Interpretation**
+   - Converts an operational case into structured intent and confidence.
+   - Model-agnostic interface.
+
+2. **Policy / Guardrails**
+   - Applies deterministic business and risk rules.
+   - Can override an AI interpretation when required.
+
+3. **Orchestration**
+   - Routes the case to the appropriate workflow.
+
+4. **Bounded tools**
+   - Execute predefined operational actions.
+   - The model does not directly authorize sensitive actions.
+
+5. **Human review**
+   - Explicit workflow for cases requiring judgment.
+
+6. **Evaluation**
+   - Measures interpretation quality and automation safety.
+
+## 4. Example decision flow
+
+A refund-related case might follow:
+
+```
+Customer case
+     ↓
+AI interpretation
+     ↓
+Refund request + confidence
+     ↓
+Policy check
+     ├── Low-risk → bounded workflow
+     ├── High-value → human approval
+     └── Uncertain → escalation
 ```
 
-## Product philosophy
+Current example policy:
 
-AI is a product capability, not a default implementation choice.
-
-The goal is to identify where AI meaningfully improves an operational workflow — for example, interpreting unstructured cases or assisting human decisions — while keeping predictable, high-risk, and deterministic decisions governed by explicit rules.
-
-**Problem → choose the right mechanism → automate where valuable → keep humans where needed → measure the outcome**
-
-This means the system may use AI, deterministic logic, traditional automation, or a combination of them depending on the problem.
-
-## Model strategy
-
-The system uses a provider abstraction:
-
-**Application → LLMProvider → Model / Gateway**
-
-The repository ships with an offline deterministic provider so it remains runnable without API keys. An optional provider interface can be connected to an approved LLM gateway without changing business policy or orchestration.
-
-Credentials are never stored in the repository.
-
-## Safety boundary
-
-**AI interprets → deterministic policy constrains → tools execute bounded actions → humans handle high-risk cases**
-
-Example policy:
 - Refunds ≥ **50M Toman** → human approval
 - Provider failures → provider operations
 - Unknown intent → escalation
 - Low-risk known workflow → bounded tool execution
 
-The LLM does not directly authorize sensitive operational actions.
+These thresholds are illustrative portfolio assumptions, not production policies.
 
-## Human-in-the-loop
+## 5. Safety boundary
 
-Cases requiring human judgment enter a review queue with:
+**AI interprets → deterministic policy constrains → tools execute bounded actions → humans handle high-risk cases**
+
+The LLM is intentionally **not** the final authority for sensitive operational decisions.
+
+This separation makes the system easier to reason about, test, change, and govern.
+
+## 6. Human-in-the-loop
+
+Human review is treated as a product workflow rather than an exception.
+
+The review queue contains:
 
 - Priority
-- Reason for escalation
+- Escalation reason
 - Status
 - Reviewer
 - Resolution notes
 
-This makes human review an explicit product workflow rather than an exception hidden inside the agent.
+This creates a measurable boundary between:
 
-## Evaluation
+**automate → assist → escalate**
 
-The project treats evaluation as a product requirement.
+rather than treating automation as a binary decision.
 
-Current metrics:
+## 7. Evaluation
+
+Evaluation is part of the product design, not a post-launch add-on.
+
+Current metrics include:
+
 - Intent accuracy
 - Automation rate
 - Escalation rate
 - High-risk automation rate
 - False automation rate
 
-The most important safety metric is **false automation**: cases where the system performs automated handling despite an incorrect interpretation.
+### Key safety metric
 
-## Run locally
+**False automation** measures cases where the system automates despite an incorrect interpretation.
+
+This is especially important because increasing automation rate alone can make a system appear successful while increasing operational risk.
+
+## 8. Model strategy
+
+The application uses a provider abstraction:
+
+**Application → LLM Provider → Model / Gateway**
+
+The repository includes an offline deterministic provider so the project can run without API keys.
+
+An approved LLM gateway can be connected without changing the business policy or orchestration layer.
+
+Credentials are never stored in the repository.
+
+## 9. Repository structure
+
+```text
+src/
+├── agent.py              # policy and risk decisions
+├── orchestrator.py       # routing and tool selection
+├── llm_adapter.py        # interpretation interface
+├── llm_provider.py       # model/provider abstraction
+├── tools.py              # bounded operational tools
+├── review_queue.py       # human review workflow
+├── evaluate.py           # evaluation
+├── metrics.py            # operational metrics
+└── run.py                # local execution
+
+data/
+├── synthetic_cases.json
+└── evaluation_cases.json
+
+dashboard/
+└── app.py                # operational control dashboard
+
+tests/
+└── ...                   # automated tests
+```
+
+## 10. Demo
+
+Run the prototype locally:
 
 ```bash
 pip install -r requirements.txt
@@ -117,22 +183,83 @@ python src/run.py
 pytest
 ```
 
-## Product questions
+Run the control dashboard:
 
-- Where should AI be allowed to decide versus recommend?
-- How should confidence affect escalation?
+```bash
+pip install -r dashboard/requirements.txt
+streamlit run dashboard/app.py
+```
+
+The dashboard provides visibility into:
+
+- Case decisions
+- Automation rate
+- Escalation rate
+- Risk distribution
+- High-risk automation
+- Decision traces
+
+## 11. Product trade-offs
+
+### Why not let the LLM decide everything?
+
+Because interpretive flexibility and decision authority are different concerns.
+
+An LLM can be useful for understanding a case while deterministic policy remains responsible for enforcing critical business constraints.
+
+### Why keep a human in the loop?
+
+Some cases have high financial impact, ambiguous context, or consequences that are difficult to reverse.
+
+The right question is therefore not:
+
+> "How do we eliminate human intervention?"
+
+It is:
+
+> "Which decisions should be automated, assisted, or reviewed by a human?"
+
+### Why provider abstraction?
+
+Model quality, latency, cost, availability, and governance requirements can change.
+
+Separating the provider from product policy makes model changes less disruptive.
+
+## 12. What I would improve next
+
+A production version would require substantially more work, including:
+
+- Real operational integrations
+- Authentication and authorization
+- Production-grade observability
+- Structured audit logs
+- More representative evaluation datasets
+- Offline and online evaluation
+- Model/prompt versioning
+- Cost and latency monitoring
+- Confidence calibration
+- Policy configuration and governance
+- A/B or controlled rollout strategy
+- Feedback loops from human reviewers
+
+## 13. Product questions this prototype explores
+
+- Where should AI decide versus recommend?
 - Which operational actions are safe to automate?
-- How much human review is optimal?
-- How do we measure whether automation improves operations rather than simply reducing headcount?
+- How should confidence affect escalation?
+- What level of human review is appropriate?
+- How should automation quality be measured?
+- When does AI complexity justify its value?
+- How do we improve operations without optimizing only for automation rate?
 
-## Data
+## Data & scope
 
-All examples are synthetic and generated for portfolio purposes. No company-confidential data, credentials, or internal workflows are included.
+All examples use synthetic/generated data for portfolio purposes.
+
+No company-confidential data, credentials, or internal workflows are included.
 
 ## Portfolio focus
 
-AI-native operations · Agentic workflows · Human-in-the-loop · Guardrails · Evaluation · Tool use · Automation · Product/system design
+**AI-native operations · Agentic workflows · Automation · Human-in-the-loop · Guardrails · Evaluation · Product/system design**
 
-## Status
-
-🚧 Executable prototype
+**Status:** Executable portfolio prototype
