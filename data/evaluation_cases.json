@@ -1,0 +1,32 @@
+[
+  {
+    "case_id": "EVAL-001",
+    "type": "booking_failure",
+    "amount_toman": 0,
+    "description": "Payment was captured but the booking confirmation is still pending."
+  },
+  {
+    "case_id": "EVAL-002",
+    "type": "refund_request",
+    "amount_toman": 12000000,
+    "description": "Customer cancelled the trip and asks for a refund."
+  },
+  {
+    "case_id": "EVAL-003",
+    "type": "refund_request",
+    "amount_toman": 75000000,
+    "description": "Customer requests reimbursement for a high-value booking."
+  },
+  {
+    "case_id": "EVAL-004",
+    "type": "provider_failure",
+    "amount_toman": 0,
+    "description": "The supplier returned a timeout while confirming the reservation."
+  },
+  {
+    "case_id": "EVAL-005",
+    "type": "unknown",
+    "amount_toman": 0,
+    "description": "Customer asks for a request that is outside the supported workflows."
+  }
+]
