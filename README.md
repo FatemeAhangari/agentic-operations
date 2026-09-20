@@ -1,59 +1,83 @@
 # Agentic Operations
 
-A product and system-design project exploring how operational workflows can move from manual case handling toward AI-assisted, human-in-the-loop execution.
+A small executable prototype for redesigning operational case handling around AI-assisted decisions, deterministic guardrails, and human-in-the-loop escalation.
 
 ## Product problem
 
 Operations teams repeatedly handle cases that require classification, investigation, decision-making, communication, and follow-up.
 
-The opportunity is not simply to add a chatbot, but to redesign the workflow around AI agents, deterministic rules, human approval, and measurable outcomes.
+The opportunity is not simply to add a chatbot. It is to redesign the workflow so that AI can propose decisions, deterministic rules constrain risk, and humans approve the cases that need judgment.
 
-## Goal
+## Prototype
 
-Design an operational agent that can:
+The current prototype processes synthetic operational cases through:
 
-1. Understand an incoming case
-2. Gather relevant context
-3. Select an appropriate workflow
-4. Execute low-risk actions
-5. Escalate uncertain or high-risk cases
-6. Record decisions and outcomes
+**Case → Intent classification → Risk rules → Action / Escalation → Audit-ready decision**
 
-## Core principle
+Supported scenarios:
+- Booking failure
+- Refund request
+- Provider failure
+- Unknown cases
 
-**AI proposes → Rules constrain → Humans approve when needed → System learns from outcomes**
+Example guardrail:
+- Refunds above **50M Toman** require human approval.
+- Provider failures are escalated to provider operations.
+- Unknown intents are never auto-executed.
 
 ## Architecture
 
 ```
 Case
  ↓
-Orchestrator
- ├── Context retrieval
- ├── Policy / rules
- ├── Agent tools
- ├── Risk & confidence checks
- └── Human-in-the-loop
+Classifier
  ↓
-Action / Escalation
+Policy / Guardrails
  ↓
-Evaluation & Audit Log
+Risk & confidence
+ ↓
+┌──────────────────────┐
+│ Low risk             │ → Execute
+│ High risk / unknown  │ → Human approval
+│ Provider issue       │ → Operations escalation
+└──────────────────────┘
+ ↓
+Decision + rationale
 ```
 
-## Portfolio focus
+## Run locally
 
-- AI-native operations
-- Agentic workflows
-- Human-in-the-loop design
-- Guardrails
-- Evaluation
-- Automation
-- Product/system design
+```bash
+pip install -r requirements.txt
+python src/run.py
+pytest
+```
+
+## Product design principles
+
+1. **AI proposes; rules constrain.**
+2. **Risk determines the level of automation.**
+3. **Uncertainty should trigger escalation, not silent failure.**
+4. **Every automated decision should leave an auditable rationale.**
+5. **Human review should be concentrated where it adds the most value.**
 
 ## Data
 
-Examples use synthetic operational cases. No company-confidential data is included.
+All examples are synthetic and generated for portfolio purposes. No company-confidential data, credentials, or internal workflows are included.
+
+## Next steps
+
+- Add retrieval of case context
+- Add tool/action simulation
+- Add confidence calibration and evaluation datasets
+- Add human-review queue
+- Add decision-quality and automation-rate metrics
+- Add an LLM adapter behind the deterministic guardrails
+
+## Portfolio focus
+
+AI-native operations · Agentic workflows · Human-in-the-loop · Guardrails · Evaluation · Automation · Product/system design
 
 ## Status
 
-🚧 In development
+🚧 Executable prototype
