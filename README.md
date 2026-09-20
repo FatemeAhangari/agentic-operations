@@ -52,6 +52,16 @@ pip install -r dashboard/requirements.txt
 streamlit run dashboard/app.py
 ```
 
+## Model strategy
+
+The system uses a provider abstraction:
+
+**Application → LLMProvider → Model / Gateway**
+
+The repository ships with an offline deterministic provider so it remains runnable without API keys. An optional provider interface can be connected to an approved LLM gateway without changing business policy or orchestration.
+
+Credentials are never stored in the repository.
+
 ## Safety boundary
 
 **AI interprets → deterministic policy constrains → tools execute bounded actions → humans handle high-risk cases**
