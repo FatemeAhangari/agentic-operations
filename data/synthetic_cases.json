@@ -1,0 +1,30 @@
+[
+  {
+    "case_id": "OPS-001",
+    "type": "booking_failure",
+    "customer_tier": "standard",
+    "amount_toman": 0,
+    "description": "Payment succeeded but the reservation was not confirmed."
+  },
+  {
+    "case_id": "OPS-002",
+    "type": "refund_request",
+    "customer_tier": "standard",
+    "amount_toman": 18500000,
+    "description": "Customer requests a refund after a cancellation."
+  },
+  {
+    "case_id": "OPS-003",
+    "type": "refund_request",
+    "customer_tier": "vip",
+    "amount_toman": 92000000,
+    "description": "VIP customer requests a high-value refund."
+  },
+  {
+    "case_id": "OPS-004",
+    "type": "provider_failure",
+    "customer_tier": "standard",
+    "amount_toman": 0,
+    "description": "Provider returned an unknown error during confirmation."
+  }
+]
