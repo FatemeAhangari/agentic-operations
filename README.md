@@ -52,6 +52,16 @@ pip install -r dashboard/requirements.txt
 streamlit run dashboard/app.py
 ```
 
+## Product philosophy
+
+AI is a product capability, not a default implementation choice.
+
+The goal is to identify where AI meaningfully improves an operational workflow — for example, interpreting unstructured cases or assisting human decisions — while keeping predictable, high-risk, and deterministic decisions governed by explicit rules.
+
+**Problem → choose the right mechanism → automate where valuable → keep humans where needed → measure the outcome**
+
+This means the system may use AI, deterministic logic, traditional automation, or a combination of them depending on the problem.
+
 ## Model strategy
 
 The system uses a provider abstraction:
