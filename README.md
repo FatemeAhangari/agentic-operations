@@ -1,66 +1,73 @@
 # Agentic Operations
 
-An executable prototype for redesigning operational case handling around AI-assisted interpretation, deterministic guardrails, tool use, and human-in-the-loop escalation.
+An executable prototype for redesigning operational case handling around AI-assisted interpretation, deterministic guardrails, bounded tool use, human review, and measurable outcomes.
 
 ## Product problem
 
 Operations teams repeatedly handle cases that require classification, investigation, decision-making, communication, and follow-up.
 
-The opportunity is not simply to add a chatbot. It is to redesign the workflow so AI can interpret ambiguous cases, deterministic policies constrain risk, tools perform bounded actions, and humans approve cases that need judgment.
+The opportunity is not simply to add a chatbot. It is to redesign the workflow so AI can interpret ambiguous cases, deterministic policies constrain risk, tools perform bounded actions, and humans handle cases where automation should stop.
 
 ## Architecture
 
-**Case → AI interpretation → Policy / Guardrails → Orchestrator → Tool / Human Review → Decision Log**
+**Case → AI interpretation → Policy / Guardrails → Orchestrator → Tool / Human Review → Decision & Evaluation**
 
-The prototype separates four concerns:
+The prototype separates:
 
 1. **Interpretation** — model-agnostic interface for understanding the case.
 2. **Policy** — deterministic risk and approval rules.
 3. **Execution** — bounded operational tools.
-4. **Evaluation** — explicit measurement of interpretation quality.
+4. **Human review** — queue for cases requiring judgment.
+5. **Evaluation** — metrics for quality and automation safety.
 
 ### Current components
 
-- `src/llm_adapter.py` — model-agnostic interpretation interface with a deterministic stand-in
+- `src/llm_adapter.py` — model-agnostic interpretation interface
 - `src/agent.py` — policy and risk decisions
 - `src/orchestrator.py` — routing and tool selection
 - `src/tools.py` — simulated operational tools
-- `src/evaluate.py` — evaluation metrics
+- `src/review_queue.py` — human-in-the-loop review queue
+- `src/evaluate.py` — interpretation evaluation
+- `src/metrics.py` — automation and safety metrics
+- `data/evaluation_cases.json` — evaluation dataset
 - `tests/` — automated tests
-- `data/synthetic_cases.json` — synthetic operational cases
-
-The deterministic stand-in is intentional: a real LLM can later replace the adapter without changing the policy or orchestration layers.
 
 ## Safety boundary
 
-The core design decision is:
+**AI interprets → deterministic policy constrains → tools execute bounded actions → humans handle high-risk cases**
 
-**LLM interprets → deterministic policy constrains → tools execute bounded actions → humans handle high-risk cases**
-
-An LLM therefore does not directly authorize high-value refunds or other sensitive operational actions.
-
-Example:
+Example policy:
 - Refunds ≥ **50M Toman** → human approval
 - Provider failures → provider operations
 - Unknown intent → escalation
 - Low-risk known workflow → bounded tool execution
 
+The LLM does not directly authorize sensitive operational actions.
+
+## Human-in-the-loop
+
+Cases requiring human judgment enter a review queue with:
+
+- Priority
+- Reason for escalation
+- Status
+- Reviewer
+- Resolution notes
+
+This makes human review an explicit product workflow rather than an exception hidden inside the agent.
+
 ## Evaluation
 
-The project treats evaluation as a product requirement, not an afterthought.
+The project treats evaluation as a product requirement.
 
 Current metrics:
 - Intent accuracy
-- Per-case prediction
-- Model confidence
-
-Next evaluation dimensions:
+- Automation rate
+- Escalation rate
+- High-risk automation rate
 - False automation rate
-- Escalation precision
-- Tool-selection accuracy
-- Decision quality
-- Latency
-- Cost
+
+The most important safety metric is **false automation**: cases where the system performs automated handling despite an incorrect interpretation.
 
 ## Run locally
 
@@ -75,7 +82,8 @@ pytest
 - Where should AI be allowed to decide versus recommend?
 - How should confidence affect escalation?
 - Which operational actions are safe to automate?
-- How do we measure whether automation actually improves operations?
+- How much human review is optimal?
+- How do we measure whether automation improves operations rather than simply reducing headcount?
 
 ## Data
 
